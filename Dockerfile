@@ -5,4 +5,4 @@ COPY package.json .
 RUN npm install
 COPY . .
 EXPOSE 4040
-CMD ["npm", "run","start:dev", "dev"]
+CMD ["npm", "run", "start:dev"]
