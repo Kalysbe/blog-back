@@ -13,7 +13,7 @@ import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserController, PostController } from './controllers/index.js';
 
 mongoose
-  .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority')
+  .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority',{ useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('DB ok'))
   .catch((err) => console.log('DB error', err));
 
