@@ -4,7 +4,8 @@ import multer from 'multer';
 import cors from 'cors';
 
 import mongoose from 'mongoose';
-
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 
 import { handleValidationErrors, checkAuth } from './utils/index.js';
