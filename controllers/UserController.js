@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import UserModel from '../models/User.js';
 
 export const register = async (req, res) => {
+  
   try {
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
@@ -13,6 +14,7 @@ export const register = async (req, res) => {
       email: req.body.email,
       fullName: req.body.fullName,
       avatarUrl: req.body.avatarUrl,
+      role:req.body.role,
       passwordHash: hash,
     });
 
@@ -101,6 +103,17 @@ export const getMe = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message: 'Нет доступа',
+    });
+  }
+};
+export const getAll = async (req, res) => {
+  try {
+    const users = await UserModel.find({}, '-password').sort({ createdAt: -1 }).exec();
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось получить статьи',
     });
   }
 };
