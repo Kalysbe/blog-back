@@ -40,6 +40,7 @@ app.use('/uploads', express.static('uploads'));
 app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
 app.post('/users',checkAuth, registerValidation, handleValidationErrors, UserController.register);
 app.put('/users/:id',checkAuth,handleValidationErrors, UserController.update,);
+app.delete('/users/:id',checkAuth,handleValidationErrors, UserController.remove,);
 app.get('/auth/me', checkAuth, UserController.getMe);
 app.get('/users', UserController.getAll);
 
