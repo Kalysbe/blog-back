@@ -44,7 +44,6 @@ export const register = async (req, res) => {
 };
 
 export const update = async (req, res) => {
-  console.log(req.params,'user')
   try {
     const userId = req.params.id; // Предполагается, что идентификатор пользователя передается через URL параметры
 
@@ -89,6 +88,41 @@ export const update = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message: 'Не удалось обновить данные пользователя!',
+    });
+  }
+};
+
+export const remove = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log(userId)
+    UserModel.findOneAndDelete(
+      {
+        _id: userId,
+      },
+      (err, doc) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            message: 'Не удалось удалить пользователя',
+          });
+        }
+
+        if (!doc) {
+          return res.status(404).json({
+            message: 'Пользователь не найден',
+          });
+        }
+
+        res.json({
+          success: true,
+        });
+      },
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось удалить пользователя',
     });
   }
 };
