@@ -13,7 +13,7 @@ import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserController, PostController } from './controllers/index.js';
 
 mongoose
-  .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority',{ useNewUrlParser: true, useUnifiedTopology: true })
+  .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('DB ok'))
   .catch((err) => console.log('DB error', err));
 
@@ -38,7 +38,8 @@ app.use(cors());
 app.use('/uploads', express.static('uploads'));
 
 app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
-app.post('/auth/register', registerValidation, handleValidationErrors, UserController.register);
+app.post('/users',checkAuth, registerValidation, handleValidationErrors, UserController.register);
+app.put('/users/:id',checkAuth,handleValidationErrors, UserController.update,);
 app.get('/auth/me', checkAuth, UserController.getMe);
 app.get('/users', UserController.getAll);
 
