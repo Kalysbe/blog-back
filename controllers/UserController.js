@@ -44,8 +44,9 @@ export const register = async (req, res) => {
 };
 
 export const update = async (req, res) => {
+  console.log(req.params,'user')
   try {
-    const userId = req.params.userId; // Предполагается, что идентификатор пользователя передается через URL параметры
+    const userId = req.params.id; // Предполагается, что идентификатор пользователя передается через URL параметры
 
     // Получаем новые данные из запроса
     const newData = {
