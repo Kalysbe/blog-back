@@ -10,7 +10,7 @@ import { registerValidation, loginValidation, postCreateValidation } from './val
 
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 
-import { UserController, PostController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController } from './controllers/index.js';
 
 mongoose
   .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -65,6 +65,17 @@ app.patch(
   PostController.update,
 );
 
+//Декларации
+app.get('/declarations', DeclarationController.getAll);
+app.get('/declarations/:id', DeclarationController.getOne);
+app.post('/declarations', checkAuth, handleValidationErrors, DeclarationController.create);
+app.delete('/declarations/:id', checkAuth, DeclarationController.remove);
+app.put(
+  '/declarations/:id',
+  checkAuth,
+  handleValidationErrors,
+  DeclarationController.update,
+)
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
     return console.log(err);
