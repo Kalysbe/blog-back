@@ -4,7 +4,12 @@ import DeclarationModel from '../models/Declaration.js';
 
 export const getAll = async (req, res) => {
   try {
-    const declarations = await DeclarationModel.find().populate('user').sort({ createdAt: -1 }).exec();
+    const declarations = await DeclarationModel.find()
+    .populate('user')
+    .select('_id code status user')
+    .sort({ createdAt: -1 })
+    .exec();
+  
     res.json(declarations);
   } catch (err) {
     console.log(err);
