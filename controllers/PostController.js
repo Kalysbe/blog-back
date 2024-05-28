@@ -104,6 +104,7 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
+  console.log(req)
   try {
     const doc = new PostModel({
       title: req.body.title,

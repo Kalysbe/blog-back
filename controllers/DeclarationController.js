@@ -6,7 +6,7 @@ export const getAll = async (req, res) => {
   try {
     const declarations = await DeclarationModel.find()
     .populate('user')
-    .select('_id code status user')
+    .select('_id title status createdAt user')
     .sort({ createdAt: -1 })
     .exec();
   
@@ -95,7 +95,6 @@ export const remove = async (req, res) => {
 export const create = async (req, res) => {
   try {
     const doc = new DeclarationModel({
-      code: req.body.code,
       title: req.body.title,
       user: req.userId,
       status: 1,

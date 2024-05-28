@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const DeclarationSchema = new mongoose.Schema(
     {
-        code: {
-            type: String,
-            required: true,
-        },
         title: {
             type: String,
             required: true,
