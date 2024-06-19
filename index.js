@@ -10,7 +10,7 @@ import { registerValidation, loginValidation, postCreateValidation } from './val
 
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 
-import { UserController, PostController, DeclarationController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController, ClientController } from './controllers/index.js';
 
 mongoose
   .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -76,6 +76,14 @@ app.put(
   handleValidationErrors,
   DeclarationController.update,
 )
+
+//Клиенты
+app.get('/clients', ClientController.getAll);
+app.get('/clients/:id', ClientController.getOne);
+app.post('/clients', handleValidationErrors, ClientController.create);
+app.delete('/clients/:id',  ClientController.remove);
+app.put('/clients/:id',handleValidationErrors,ClientController.update,)
+
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
     return console.log(err);
