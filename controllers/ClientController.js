@@ -5,8 +5,10 @@ import ClientModel from '../models/Client.js';
 export const getAll = async (req, res) => {
   try {
     const clients = await ClientModel.find()
-    .sort({ createdAt: -1 })
-    .exec();
+      .select('_id name typeBusiness')
+      .sort({ createdAt: -1 })
+      .exec();  
+     
     res.json(clients);
   } catch (err) {
     console.log(err);
@@ -90,13 +92,18 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
+  console.log(req.body.tax, 'req')
   try {
     const doc = new ClientModel({
       name: req.body.name,
+      typeBusiness: req.body.typeBusiness,
+      tax: req.body.tax,
+      finance: req.body.finance,
     });
 
-    const client = await doc.save();
+    console.log(doc, 'doc')
 
+    const client = await doc.save();
     res.json(client);
   } catch (err) {
     console.log(err);
