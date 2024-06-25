@@ -22,40 +22,63 @@ export const getOne = async (req, res) => {
   try {
     const clientId = req.params.id;
 
-    ClientModel.findOneAndUpdate(
-      {
-        _id: clientId,
-      },
-      {
-        $inc: { viewsCount: 1 },
-      },
-      {
-        returnDocument: 'after',
-      },
-      (err, doc) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({
-            message: 'Не удалось вернуть клиента',
-          });
-        }
+    const updatedClient = await ClientModel.findOneAndUpdate(
+      { _id: clientId },
+      { $inc: { viewsCount: 1 } },
+      { returnDocument: 'after' }
+    ).exec();
 
-        if (!doc) {
-          return res.status(404).json({
-            message: 'Клиент не найден',
-          });
-        }
+    if (!updatedClient) {
+      return res.status(404).json({
+        message: 'Клиент не найден',
+      });
+    }
 
-        res.json(doc);
-      },
-    );
+    // Обработка данных клиента
+    let totalCost = 0;
+    let contractorNames = new Set();
+
+    const financeData = updatedClient.finance;
+
+    // Итерация по годам и месяцам
+ 
+    for (const year in financeData) {
+      for (const month in financeData[year]) {
+        const monthData = financeData[year][month];
+
+        // Добавление суммы из total
+        totalCost += monthData.total || monthData.total || 0;
+
+        // Сбор уникальных contractorName
+        monthData.receipts.forEach(receipt => {
+          contractorNames.add(receipt.contractorName);
+        });
+      }
+    }
+
+    // Вычисление суммы налога
+    const taxRate = updatedClient.tax || 0;
+    const taxAmount = totalCost * (taxRate / 100);
+
+    // Формирование ответа
+    const response = {
+      ...updatedClient.toObject(), // Преобразуем документ в объект
+      financeSummary: {
+        totalCost,
+        taxAmount,
+        uniqueContractors: contractorNames.size,
+      }
+    };
+
+    res.json(response);
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Не удалось получить статьи',
+      message: 'Не удалось получить клиента',
     });
   }
 };
+
 
 export const remove = async (req, res) => {
   try {
