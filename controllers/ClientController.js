@@ -115,7 +115,7 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-  console.log('Запрос получен с данными:', req.body);
+ 
 
   try {
     const doc = new ClientModel({
@@ -125,29 +125,8 @@ export const create = async (req, res) => {
       finance: req.body.finance,
     });
 
-    console.log('Созданный документ:', doc);
-
     const client = await doc.save();
-
-    // Формируем XML-файл на основе данных клиента
-    const xmlData = `
-      <client>
-        <name>${client.name}</name>
-        <typeBusiness>${client.typeBusiness}</typeBusiness>
-        <tax>${client.tax}</tax>
-        <finance>${client.finance}</finance>
-      </client>
-    `;
-
-    // Генерируем уникальное имя файла
-    const fileName = `client_${client._id}.xml`;
-    const filePath = `C:/Users/Kalysbek IT/Desktop/1с/${fileName}`; // Укажите путь, где вы хотите сохранить файл
-
-    // Сохраняем XML в файл
-    fs.writeFileSync(filePath, xmlData);
-
-    // Возвращаем имя файла в ответе
-    res.json({ fileName });
+    res.json(client);
   } catch (err) {
     console.log('Ошибка при создании клиента:', err);
     res.status(500).json({
