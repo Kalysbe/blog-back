@@ -3,6 +3,8 @@ import fs from 'fs';
 import multer from 'multer';
 import cors from 'cors';
 
+import xmlparser from 'express-xml-bodyparser';
+
 import mongoose from 'mongoose';
 
 mongoose.set('strictQuery', false);
@@ -10,7 +12,7 @@ import { registerValidation, loginValidation, postCreateValidation } from './val
 
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 
-import { UserController, PostController, DeclarationController, ClientController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController, ClientController, XmlController } from './controllers/index.js';
 
 mongoose
   .connect('mongodb+srv://rrkalysbe:123123kk@cluster0.cr98zh3.mongodb.net/blog?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -83,6 +85,8 @@ app.get('/clients/:id', ClientController.getOne);
 app.post('/clients', handleValidationErrors, ClientController.create);
 app.delete('/clients/:id',  ClientController.remove);
 app.put('/clients/:id',handleValidationErrors,ClientController.update,)
+
+app.post('/xml',   xmlparser(), XmlController.create);
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
