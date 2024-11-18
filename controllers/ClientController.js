@@ -1,6 +1,6 @@
 import ClientModel from '../models/Client.js';
-
-
+import fs from 'fs'
+import { Builder } from 'xml2js'; 
 
 export const getAll = async (req, res) => {
   try {
@@ -115,7 +115,8 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-  console.log(req.body.tax, 'req')
+  console.log('Запрос получен с данными:', req.body);
+
   try {
     const doc = new ClientModel({
       name: req.body.name,
@@ -124,17 +125,38 @@ export const create = async (req, res) => {
       finance: req.body.finance,
     });
 
-    console.log(doc, 'doc')
+    console.log('Созданный документ:', doc);
 
     const client = await doc.save();
-    res.json(client);
+
+    // Формируем XML-файл на основе данных клиента
+    const xmlData = `
+      <client>
+        <name>${client.name}</name>
+        <typeBusiness>${client.typeBusiness}</typeBusiness>
+        <tax>${client.tax}</tax>
+        <finance>${client.finance}</finance>
+      </client>
+    `;
+
+    // Генерируем уникальное имя файла
+    const fileName = `client_${client._id}.xml`;
+    const filePath = `C:/Users/Kalysbek IT/Desktop/1с/${fileName}`; // Укажите путь, где вы хотите сохранить файл
+
+    // Сохраняем XML в файл
+    fs.writeFileSync(filePath, xmlData);
+
+    // Возвращаем имя файла в ответе
+    res.json({ fileName });
   } catch (err) {
-    console.log(err);
+    console.log('Ошибка при создании клиента:', err);
     res.status(500).json({
       message: 'Не удалось создать',
     });
   }
 };
+
+
 
 export const update = async (req, res) => {
   try {
