@@ -1,5 +1,5 @@
-
-
+import { parseString } from 'xml2js';
+import XMLModel from '../models/Xml.js';
 
 function getQuarter(dateString) {
   const date = new Date(dateString);
@@ -51,28 +51,67 @@ function groupByYearAndQuarter(receipts) {
 }
 
 
+function cleanJson(obj) {
+  if (Array.isArray(obj) && obj.length === 1) {
+      return cleanJson(obj[0]); // Если массив содержит один элемент, разворачиваем его
+  } else if (obj !== null && typeof obj === 'object') {
+      for (const key in obj) {
+          obj[key] = cleanJson(obj[key]); // Рекурсивно обрабатываем вложенные объекты
+      }
+  }
+  return obj;
+}
+
+
 export const create = async (req, res) => {
-  const data = req.body; // Если данные передаются в теле запроса
-  console.log(JSON.stringify(data, null, 2)); 
-  const parsedReceipts = parseReceipts(req.body);
-  const groupedData = groupByYearAndQuarter(parsedReceipts);
-  console.log(groupedData);
-
   try {
+    // Получаем IP-адрес клиента с учётом прокси
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
+    const normalizedIp = clientIp === '::1' ? '127.0.0.1' : clientIp;
 
+    // Время и дата запроса
+    const requestTime = new Date().toISOString();
+
+    // Логируем информацию о запросе
+    console.log('Request Info:');
+    console.log(`IP Address: ${normalizedIp}`);
+    console.log(`Request Method: ${req.method}`);
+    console.log(`Request URL: ${req.originalUrl}`);
+    console.log(`User-Agent: ${req.headers['user-agent']}`);
+    console.log(`Request Time: ${requestTime}`);
+    console.log(`Headers:`, req.headers);
+
+    // Извлекаем данные и очищаем их от лишних массивов
+    let data = req.body;
+    data = cleanJson(data);
+
+    // Извлекаем и фильтруем receipts
+    const receipts = Array.isArray(data.receipts?.receipt) ? data.receipts.receipt : [data.receipts?.receipt];
+    const filteredReceipts = receipts.filter(receipt => receipt.documentStatusName !== 'Отклонен');
+
+    // Формируем данные для сохранения
+    const fData = {
+      company: "test", // Массив имен компаний
+      ip: normalizedIp,
+      data: filteredReceipts
+    };
+
+    // Создаем документ и сохраняем его в базе
+    const doc = new XMLModel(fData);
+    await doc.save();
+
+    // Формируем имя файла и сохраняем XML
     const fileName = `client_${Date.now()}.xml`;
 
 
-    // Сохраняем XML в файл
-    // fs.writeFileSync(filePath, xmlData, 'utf-8');
-    console.log(`XML успешно сохранен в файл: ${fileName}`);
 
     // Возвращаем успешный ответ
-    res.status(200).send(fileName);
+    return res.status(200).send({ fileName });
   } catch (error) {
-    console.error('Ошибка обработки XML:', error);
-    res.status(500).json({
-      message: 'Не удалось обработать XML.',
+    // Обрабатываем ошибку
+    console.error('Ошибка обработки запроса:', error);
+    return res.status(500).json({
+      message: 'Не удалось обработать запрос.',
       error: error.message,
     });
   }
