@@ -87,6 +87,7 @@ app.delete('/clients/:id',  ClientController.remove);
 app.put('/clients/:id',handleValidationErrors,ClientController.update,)
 
 app.post('/xml',   xmlparser(), XmlController.create);
+app.post('/xml/convert',   xmlparser(), XmlController.converter);
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {

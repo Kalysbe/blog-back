@@ -77,3 +77,16 @@ export const create = async (req, res) => {
     });
   }
 };
+
+export const converter = async (req, res) => {
+   const data = JSON.stringify(req.body, null, 2); 
+  try {
+    res.status(200).send(data);
+  } catch (error) {
+    console.error('Ошибка обработки XML:', error);
+    res.status(500).json({
+      message: 'Не удалось обработать XML.',
+      error: error.message,
+    });
+  }
+}
