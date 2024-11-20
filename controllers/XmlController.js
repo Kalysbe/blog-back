@@ -1,5 +1,6 @@
 import { parseString } from 'xml2js';
 import XMLModel from '../models/Xml.js';
+import xml2js from 'xml2js';
 
 function getQuarter(dateString) {
   const date = new Date(dateString);
@@ -51,19 +52,40 @@ function groupByYearAndQuarter(receipts) {
 }
 
 
-function cleanJson(obj) {
-  if (Array.isArray(obj) && obj.length === 1) {
-      return cleanJson(obj[0]); // Если массив содержит один элемент, разворачиваем его
-  } else if (obj !== null && typeof obj === 'object') {
-      for (const key in obj) {
-          obj[key] = cleanJson(obj[key]); // Рекурсивно обрабатываем вложенные объекты
+function XMLParser(obj) {
+  const options = {
+    explicitArray: false,  // Убираем создание массива для одиночных элементов
+    normalizeTags: true,   // Нормализуем теги
+    mergeAttrs: true,      // Сливаем атрибуты в объект
+  };
+
+  return new Promise((resolve, reject) => {
+    xml2js.parseString(obj, options, (err, result) => {
+      if (err) {
+        reject('Ошибка при парсинге XML: ' + err);
+      } else {
+        // Обеспечиваем, чтобы receipts всегда был массивом
+        if (!Array.isArray(result.receipts.receipt)) {
+          result.receipts.receipt = [result.receipts.receipt];  // Если это не массив, делаем его массивом
+        }
+        // Преобразуем receipt в объект, если это необходимо
+        result.receipts.receipt = result.receipts.receipt.map(receipt => {
+          if (typeof receipt === 'object') {
+            return receipt;  // Просто возвращаем объект
+          }
+          return { receipt };  // Если это не объект, оборачиваем в объект
+        });
+
+        resolve(result);  // Возвращаем результат
       }
-  }
-  return obj;
+    });
+  });
 }
 
 
 export const create = async (req, res) => {
+  let data = req.body;  // XML данные, которые были переданы через body
+
   try {
     // Получаем IP-адрес клиента с учётом прокси
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
@@ -72,32 +94,28 @@ export const create = async (req, res) => {
     // Время и дата запроса
     const requestTime = new Date().toISOString();
 
+    // Парсим XML с использованием асинхронной функции
+    const parsedData = await XMLParser(data);
 
-    // Извлекаем данные и очищаем их от лишних массивов
-    let data = req.body;
-    data = cleanJson(data).receipts.receipt;
-
-    console.log(data[0])
-  
+    console.log(parsedData);
 
     // Формируем данные для сохранения
     const fData = {
-      company: data[0].organizationname, // Массив имен компаний
+      company: parsedData.receipts.receipt[0].organizationname,  // Массив имен компаний
       ip: normalizedIp,
-      data: data
+      data: parsedData.receipts.receipt  // Данные XML
     };
 
-    // Создаем документ и сохраняем его в базе
+    // Создаем документ и сохраняем его в базе данных
     const doc = new XMLModel(fData);
     await doc.save();
 
-    // Формируем имя файла и сохраняем XML
+    // Формируем имя файла для сохранения XML
     const fileName = `client_${Date.now()}.xml`;
-
-
 
     // Возвращаем успешный ответ
     return res.status(200).send(fileName);
+
   } catch (error) {
     // Обрабатываем ошибку
     console.error('Ошибка обработки запроса:', error);

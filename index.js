@@ -3,6 +3,7 @@ import fs from 'fs';
 import multer from 'multer';
 import cors from 'cors';
 import xmlparser from 'express-xml-bodyparser';
+import xml2js from 'xml2js';
 import mongoose from 'mongoose';
 
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
@@ -17,6 +18,24 @@ mongoose
   .catch((err) => console.log('DB error', err));
 
 const app = express();
+
+// Middleware для парсинга XML
+export const xmlParserMiddleware = (req, res, next) => {
+  if (req.headers['content-type'] === 'application/xml' || req.headers['content-type'] === 'text/xml') {
+    let xmlData = '';
+
+    req.on('data', chunk => {
+      xmlData += chunk;
+    });
+
+    req.on('end', () => {
+      req.body = xmlData;  // Сохраняем XML-данные в body
+      next();
+    });
+  } else {
+    next();  // Если это не XML, просто передаем дальше
+  }
+};
 
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
@@ -70,7 +89,7 @@ app.post(`/api/clients`, handleValidationErrors, ClientController.create);
 app.delete(`/api/clients/:id`, ClientController.remove);
 app.put(`/api/clients/:id`, handleValidationErrors, ClientController.update);
 
-app.post(`/api/xml`, xmlparser(), XmlController.create);
+app.post(`/api/xml`, xmlParserMiddleware, XmlController.create);
 app.get(`/api/xml`, XmlController.getAll);
 app.post(`/api/xml/convert`, xmlparser(), XmlController.converter);
 
