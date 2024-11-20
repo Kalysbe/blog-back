@@ -106,7 +106,7 @@ export const create = async (req, res) => {
 
 
     // Возвращаем успешный ответ
-    return res.status(200).send({ fileName });
+    return res.status(200).send(fileName);
   } catch (error) {
     // Обрабатываем ошибку
     console.error('Ошибка обработки запроса:', error);
