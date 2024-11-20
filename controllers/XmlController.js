@@ -72,20 +72,12 @@ export const create = async (req, res) => {
     // Время и дата запроса
     const requestTime = new Date().toISOString();
 
-    // Логируем информацию о запросе
-    console.log('Request Info:');
-    console.log(`IP Address: ${normalizedIp}`);
-    console.log(`Request Method: ${req.method}`);
-    console.log(`Request URL: ${req.originalUrl}`);
-    console.log(`User-Agent: ${req.headers['user-agent']}`);
-    console.log(`Request Time: ${requestTime}`);
-    console.log(`Headers:`, req.headers);
 
     // Извлекаем данные и очищаем их от лишних массивов
     let data = req.body;
     data = cleanJson(data).receipts.receipt;
 
- 
+    console.log(data)
 
     // Формируем данные для сохранения
     const fData = {
