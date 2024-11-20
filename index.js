@@ -38,40 +38,40 @@ app.use('/uploads', express.static('uploads'));
 
 const apiPrefix = process.env.NODE_ENV === 'production' ? '/api' : '';
 
-app.post(`${apiPrefix}/auth/login`, loginValidation, handleValidationErrors, UserController.login);
-app.post(`${apiPrefix}/users`, checkAuth, registerValidation, handleValidationErrors, UserController.register);
-app.put(`${apiPrefix}/users/:id`, checkAuth, handleValidationErrors, UserController.update);
-app.delete(`${apiPrefix}/users/:id`, checkAuth, handleValidationErrors, UserController.remove);
-app.get(`${apiPrefix}/auth/me`, checkAuth, UserController.getMe);
-app.get(`${apiPrefix}/users`, UserController.getAll);
+app.post(`api/auth/login`, loginValidation, handleValidationErrors, UserController.login);
+app.post(`api/users`, checkAuth, registerValidation, handleValidationErrors, UserController.register);
+app.put(`api/users/:id`, checkAuth, handleValidationErrors, UserController.update);
+app.delete(`api/users/:id`, checkAuth, handleValidationErrors, UserController.remove);
+app.get(`api/auth/me`, checkAuth, UserController.getMe);
+app.get(`api/users`, UserController.getAll);
 
-app.post(`${apiPrefix}/upload`, checkAuth, upload.single('image'), (req, res) => {
+app.post(`api/upload`, checkAuth, upload.single('image'), (req, res) => {
   res.json({
     url: `/uploads/${req.file.originalname}`,
   });
 });
 
-app.get(`${apiPrefix}/posts`, PostController.getAll);
-app.get(`${apiPrefix}/posts/tags`, PostController.getLastTags);
-app.get(`${apiPrefix}/posts/:id`, PostController.getOne);
-app.post(`${apiPrefix}/posts`, checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
-app.delete(`${apiPrefix}/posts/:id`, checkAuth, PostController.remove);
-app.patch(`${apiPrefix}/posts/:id`, checkAuth, postCreateValidation, handleValidationErrors, PostController.update);
+app.get(`api/posts`, PostController.getAll);
+app.get(`api/posts/tags`, PostController.getLastTags);
+app.get(`api/posts/:id`, PostController.getOne);
+app.post(`api/posts`, checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
+app.delete(`api/posts/:id`, checkAuth, PostController.remove);
+app.patch(`api/posts/:id`, checkAuth, postCreateValidation, handleValidationErrors, PostController.update);
 
-app.get(`${apiPrefix}/declarations`, DeclarationController.getAll);
-app.get(`${apiPrefix}/declarations/:id`, DeclarationController.getOne);
-app.post(`${apiPrefix}/declarations`, checkAuth, handleValidationErrors, DeclarationController.create);
-app.delete(`${apiPrefix}/declarations/:id`, checkAuth, DeclarationController.remove);
-app.put(`${apiPrefix}/declarations/:id`, checkAuth, handleValidationErrors, DeclarationController.update);
+app.get(`api/declarations`, DeclarationController.getAll);
+app.get(`api/declarations/:id`, DeclarationController.getOne);
+app.post(`api/declarations`, checkAuth, handleValidationErrors, DeclarationController.create);
+app.delete(`api/declarations/:id`, checkAuth, DeclarationController.remove);
+app.put(`api/declarations/:id`, checkAuth, handleValidationErrors, DeclarationController.update);
 
-app.get(`${apiPrefix}/clients`, ClientController.getAll);
-app.get(`${apiPrefix}/clients/:id`, ClientController.getOne);
-app.post(`${apiPrefix}/clients`, handleValidationErrors, ClientController.create);
-app.delete(`${apiPrefix}/clients/:id`, ClientController.remove);
-app.put(`${apiPrefix}/clients/:id`, handleValidationErrors, ClientController.update);
+app.get(`api/clients`, ClientController.getAll);
+app.get(`api/clients/:id`, ClientController.getOne);
+app.post(`api/clients`, handleValidationErrors, ClientController.create);
+app.delete(`api/clients/:id`, ClientController.remove);
+app.put(`api/clients/:id`, handleValidationErrors, ClientController.update);
 
-app.post(`${apiPrefix}/xml`, xmlparser(), XmlController.create);
-app.post(`${apiPrefix}/xml/convert`, xmlparser(), XmlController.converter);
+app.post(`api/xml`, xmlparser(), XmlController.create);
+app.post(`api/xml/convert`, xmlparser(), XmlController.converter);
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
