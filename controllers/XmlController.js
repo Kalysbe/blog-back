@@ -77,7 +77,8 @@ export const create = async (req, res) => {
     let data = req.body;
     data = cleanJson(data).receipts.receipt;
 
-    console.log(data)
+    console.log(data[0])
+  
 
     // Формируем данные для сохранения
     const fData = {
