@@ -83,17 +83,15 @@ export const create = async (req, res) => {
 
     // Извлекаем данные и очищаем их от лишних массивов
     let data = req.body;
-    data = cleanJson(data);
+    data = cleanJson(data).receipts.receipt;
 
-    // Извлекаем и фильтруем receipts
-    const receipts = Array.isArray(data.receipts?.receipt) ? data.receipts.receipt : [data.receipts?.receipt];
-    const filteredReceipts = receipts.filter(receipt => receipt.documentStatusName !== 'Отклонен');
+ 
 
     // Формируем данные для сохранения
     const fData = {
-      company: "test", // Массив имен компаний
+      company: data[0].organizationname, // Массив имен компаний
       ip: normalizedIp,
-      data: filteredReceipts
+      data: data
     };
 
     // Создаем документ и сохраняем его в базе
@@ -113,6 +111,22 @@ export const create = async (req, res) => {
     return res.status(500).json({
       message: 'Не удалось обработать запрос.',
       error: error.message,
+    });
+  }
+};
+
+export const getAll = async (req, res) => {
+  try {
+    const xmls = await XMLModel.find()
+      .select('_id company ip createdAt')
+      .sort({ createdAt: -1 })
+      .exec();  
+     
+    res.json(xmls);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось получить клиентов',
     });
   }
 };

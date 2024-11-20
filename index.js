@@ -71,6 +71,7 @@ app.delete(`/api/clients/:id`, ClientController.remove);
 app.put(`/api/clients/:id`, handleValidationErrors, ClientController.update);
 
 app.post(`/api/xml`, xmlparser(), XmlController.create);
+app.get(`/api/xml`, XmlController.getAll);
 app.post(`/api/xml/convert`, xmlparser(), XmlController.converter);
 
 app.listen(process.env.PORT || 4444, (err) => {
