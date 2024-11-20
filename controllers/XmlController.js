@@ -1,6 +1,6 @@
 import { parseString } from 'xml2js';
 import XMLModel from '../models/Xml.js';
-import xml2js from 'xml2js';
+import { XMLParser } from "fast-xml-parser";
 
 function getQuarter(dateString) {
   const date = new Date(dateString);
@@ -52,75 +52,89 @@ function groupByYearAndQuarter(receipts) {
 }
 
 
-function XMLParser(obj) {
-  const options = {
-    explicitArray: false,  // Убираем создание массива для одиночных элементов
-    normalizeTags: true,   // Нормализуем теги
-    mergeAttrs: true,      // Сливаем атрибуты в объект
-  };
+// function XMLParser(obj) {
+//   console.log(obj)
+//   // Убираем все пробелы и символы новой строки до первого тега
+//   const cleanedXml = obj
 
-  return new Promise((resolve, reject) => {
-    xml2js.parseString(obj, options, (err, result) => {
-      if (err) {
-        reject('Ошибка при парсинге XML: ' + err);
-      } else {
-        // Обеспечиваем, чтобы receipts всегда был массивом
-        if (!Array.isArray(result.receipts.receipt)) {
-          result.receipts.receipt = [result.receipts.receipt];  // Если это не массив, делаем его массивом
-        }
-        // Преобразуем receipt в объект, если это необходимо
-        result.receipts.receipt = result.receipts.receipt.map(receipt => {
-          if (typeof receipt === 'object') {
-            return receipt;  // Просто возвращаем объект
-          }
-          return { receipt };  // Если это не объект, оборачиваем в объект
-        });
+//   const options = {
+//     explicitArray: false,  // Убираем создание массива для одиночных элементов
+//     normalizeTags: true,   // Нормализуем теги
+//     mergeAttrs: true,      // Сливаем атрибуты в объект
+//   };
 
-        resolve(result);  // Возвращаем результат
-      }
-    });
-  });
-}
+//   return new Promise((resolve, reject) => {
+//     xml2js.parseString(cleanedXml, options, (err, result) => {
+//       if (err) {
+//         reject('Ошибка при парсинге XML: ' + err);
+//       } else {
+//         // Убедимся, что receipts всегда является массивом
+//         if (!result.receipts || !Array.isArray(result.receipts.receipt)) {
+//           reject('Ошибка: нет или неправильный формат receipts.receipt');
+//           return;
+//         }
 
+//         // Обрабатываем receipt как объект
+//         result.receipts.receipt = result.receipts.receipt.map(receipt => {
+//           if (typeof receipt === 'object') {
+//             return receipt;  // Просто возвращаем объект
+//           }
+//           return { receipt };  // Если это не объект, оборачиваем в объект
+//         });
+
+//         resolve(result);  // Возвращаем результат
+//       }
+//     });
+//   });
+// }
 
 export const create = async (req, res) => {
-  let data = req.body;  // XML данные, которые были переданы через body
-
   try {
-    // Получаем IP-адрес клиента с учётом прокси
-    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
-    const normalizedIp = clientIp === '::1' ? '127.0.0.1' : clientIp;
+    const xmlData = req.body; // Получаем XML данные из тела запроса
 
-    // Время и дата запроса
-    const requestTime = new Date().toISOString();
+    // Настройки для парсера
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "", // Убираем префикс для атрибутов
+    });
 
-    // Парсим XML с использованием асинхронной функции
-    const parsedData = await XMLParser(data);
+    // Парсим XML в JSON
+    const parsedData = parser.parse(xmlData);
+
+    // Убедимся, что receipts всегда массив
+    if (!Array.isArray(parsedData.receipts.receipt)) {
+      parsedData.receipts.receipt = [parsedData.receipts.receipt];
+    }
 
     console.log(parsedData);
 
-    // Формируем данные для сохранения
-    const fData = {
-      company: parsedData.receipts.receipt[0].organizationname,  // Массив имен компаний
-      ip: normalizedIp,
-      data: parsedData.receipts.receipt  // Данные XML
-    };
+    // Пример обработки данных
+    const clientIp =
+      req.headers["x-forwarded-for"] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress;
+    const normalizedIp = clientIp === "::1" ? "127.0.0.1" : clientIp;
 
-    // Создаем документ и сохраняем его в базе данных
+    const fData = {
+      // company: parsedData.receipts.receipt[0].organizationName, // Имя компании
+      company:'12',
+      ip: normalizedIp,
+      data: parsedData.receipts.receipt,
+    };
+    console.log('finish',parsedData.receipts.receipt)
+    // Сохранение в базе данных (пример)
     const doc = new XMLModel(fData);
     await doc.save();
 
-    // Формируем имя файла для сохранения XML
+    // Генерация имени файла
     const fileName = `client_${Date.now()}.xml`;
 
     // Возвращаем успешный ответ
-    return res.status(200).send(fileName);
-
+    res.status(200).send(fileName);
   } catch (error) {
-    // Обрабатываем ошибку
-    console.error('Ошибка обработки запроса:', error);
-    return res.status(500).json({
-      message: 'Не удалось обработать запрос.',
+    console.error("Ошибка обработки запроса:", error);
+    res.status(500).json({
+      message: "Не удалось обработать запрос.",
       error: error.message,
     });
   }
