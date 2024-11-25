@@ -130,7 +130,7 @@ export const create = async (req, res) => {
       ip: normalizedIp,
       data: parsedData.receipts.receipt,
     };
-    console.log('finish', parsedData.receipts.receipt)
+
     // Сохранение в базе данных (пример)
     const doc = new XMLModel(fData);
     await doc.save();
