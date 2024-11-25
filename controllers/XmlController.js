@@ -109,15 +109,24 @@ export const create = async (req, res) => {
     console.log(parsedData);
 
     // Пример обработки данных
-    const clientIp =
-      req.headers["x-forwarded-for"] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress;
-    const normalizedIp = clientIp === "::1" ? "127.0.0.1" : clientIp;
+    const clientIp = 
+    req.headers["x-forwarded-for"]?.split(",")[0].trim() || // Учитываем, что заголовок может содержать несколько IP через запятую
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress;
+
+// Нормализуем IP-адрес
+const normalizedIp = clientIp.startsWith("::ffff:") 
+    ? clientIp.substring(7) // Убираем IPv6-префикс для IPv4
+    : clientIp === "::1" 
+    ? "127.0.0.1" 
+    : clientIp;
+
+console.log("Client IP:", normalizedIp);
+
 
     const fData = {
-      // company: parsedData.receipts.receipt[0].organizationName, // Имя компании
-      company:'12',
+      company: parsedData.receipts.receipt[0].organizationName, // Имя компании
+      // company:'12',
       ip: normalizedIp,
       data: parsedData.receipts.receipt,
     };
@@ -152,6 +161,45 @@ export const getAll = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message: 'Не удалось получить клиентов',
+    });
+  }
+};
+
+export const getOne = async (req, res) => {
+  try {
+    const esfId = req.params.id;
+
+    XMLModel.findOneAndUpdate(
+      {
+        _id: esfId,
+      },
+      {
+        $inc: { viewsCount: 1 },
+      },
+      {
+        returnDocument: 'after',
+      },
+      (err, doc) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            message: 'Не удалось вернуть ЭСФ',
+          });
+        }
+
+        if (!doc) {
+          return res.status(404).json({
+            message: 'ЭСФ не найден',
+          });
+        }
+
+        res.json(doc);
+      },
+    ).populate('company');
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось получить ЭСФ',
     });
   }
 };
