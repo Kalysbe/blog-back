@@ -7,30 +7,26 @@ import { exec } from 'child_process';
 
 
 // Функция для получения списка пользователей с сервера
-const getMailAccountsFromServer = () => {
-    return new Promise((resolve, reject) => {
-      exec('getent passwd', (error, stdout, stderr) => {
-        if (error) {
-          return reject(`Error fetching user list: ${stderr}`);
-        }
-  
-        // Фильтруем пользователей, например, ищем тех, чьи домашние директории содержат "/var/mail/"
-        const accounts = stdout
-          .split('\n')
-          .filter(line => line.includes('/var/mail/'))
-          .map(line => line.split(':')[0]); // Берем только имя пользователя
-        console.log(accounts,'accoutnts')
-        resolve(accounts);
-      });
-    });
-  };
 
 
 export const getAll = async (req, res) => {
   try {
 
-    const emailAccountsFromServer = await getMailAccountsFromServer();
-    res.json(emailAccountsFromServer);
+    exec('doveadm user \'*\'' , (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return res.status(500).json({ error: 'Error executing doveadm command' });
+      }
+  
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return res.status(500).json({ error: stderr });
+      }
+  
+      // Разбиваем вывод по строкам и возвращаем как JSON
+      const mailUsers = stdout.split('\n').filter(user => user.trim() !== '');
+      return res.json(mailUsers);
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({
