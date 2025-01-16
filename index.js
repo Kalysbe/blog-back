@@ -73,6 +73,7 @@ app.put(`/api/clients/:id`, handleValidationErrors, ClientController.update);
 
 app.post('/api/xml', bodyParser.text({ type: 'application/xml' }), XmlController.create);
 app.get(`/api/xml`, XmlController.getAll);
+app.get(`/api/xml/:id`, XmlController.getOne);
 app.post(`/api/xml/convert`, bodyParser.text({ type: 'application/xml' }), XmlController.converter);
 
 app.get(`/api/email/users`,EmailController.getAll);

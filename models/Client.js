@@ -8,11 +8,11 @@ const ClientSchema = new mongoose.Schema(
         },
         typeBusiness: {
             type: String,
-            required: true,
+            required: false,
         },
         tax: {
             type: Number,
-            required: true,
+            required: false,
         },
         finance: {
             type: Object,
