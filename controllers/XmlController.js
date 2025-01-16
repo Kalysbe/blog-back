@@ -1,5 +1,6 @@
 import { parseString } from 'xml2js';
 import XMLModel from '../models/Xml.js';
+import ClientModel from '../models/Client.js';
 import { XMLParser } from "fast-xml-parser";
 
 function getQuarter(dateString) {
@@ -110,21 +111,35 @@ export const create = async (req, res) => {
 
     // Пример обработки данных
     const clientIp =
-      req.headers["x-forwarded-for"] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress;
-    const normalizedIp = clientIp === "::1" ? "127.0.0.1" : clientIp;
+      req.headers["x-forwarded-for"]?.split(",")[0].trim() || // Учитываем, что заголовок может содержать несколько IP через запятую
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress;
+
+    // Нормализуем IP-адрес
+    const normalizedIp = clientIp.startsWith("::ffff:")
+      ? clientIp.substring(7) // Убираем IPv6-префикс для IPv4
+      : clientIp === "::1"
+        ? "127.0.0.1"
+        : clientIp;
+
+    console.log("Client IP:", normalizedIp);
+
 
     const fData = {
-      // company: parsedData.receipts.receipt[0].organizationName, // Имя компании
-      company:'12',
+      company: parsedData.receipts.receipt[0].organizationName, // Имя компании
       ip: normalizedIp,
       data: parsedData.receipts.receipt,
     };
-    console.log('finish',parsedData.receipts.receipt)
+
     // Сохранение в базе данных (пример)
     const doc = new XMLModel(fData);
     await doc.save();
+
+    createClient(fData)
+
+
+   
+   
 
     // Генерация имени файла
     const fileName = `client_${Date.now()}.xml`;
@@ -145,8 +160,8 @@ export const getAll = async (req, res) => {
     const xmls = await XMLModel.find()
       .select('_id company ip createdAt')
       .sort({ createdAt: -1 })
-      .exec();  
-     
+      .exec();
+
     res.json(xmls);
   } catch (err) {
     console.log(err);
@@ -156,8 +171,47 @@ export const getAll = async (req, res) => {
   }
 };
 
+export const getOne = async (req, res) => {
+  try {
+    const esfId = req.params.id;
+
+    XMLModel.findOneAndUpdate(
+      {
+        _id: esfId,
+      },
+      {
+        $inc: { viewsCount: 1 },
+      },
+      {
+        returnDocument: 'after',
+      },
+      (err, doc) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            message: 'Не удалось вернуть ЭСФ',
+          });
+        }
+
+        if (!doc) {
+          return res.status(404).json({
+            message: 'ЭСФ не найден',
+          });
+        }
+
+        res.json(doc);
+      },
+    ).populate('company');
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось получить ЭСФ',
+    });
+  }
+};
+
 export const converter = async (req, res) => {
-   const data = JSON.stringify(req.body, null, 2); 
+  const data = JSON.stringify(req.body, null, 2);
   try {
     res.status(200).send(data);
   } catch (error) {
@@ -167,4 +221,43 @@ export const converter = async (req, res) => {
       error: error.message,
     });
   }
+}
+
+const createClient = async (data) => {
+  const existingClient = await ClientModel.findOne({ name: data.company });
+
+  
+  const date = new Date(data.createdDate); // Создаем объект Date
+  
+  const year = date.getFullYear(); // Получаем год
+  const month = date.getMonth() + 1; // Номер месяца (1-12)
+  const quarter = Math.ceil(month / 3); // Вычисляем квартал
+
+  const finance = {year: {
+    quarter: {
+      receipts: [
+        data.data.map(item => (
+          {contractorName:item.contractorName, createdDate: item.createdDate, totalCost:item.totalCost}
+        ))
+      ]
+    }
+  }}
+
+ 
+
+  console.log(finance);
+
+
+
+  if (!existingClient) {
+    const clientDoc = new ClientModel({
+      name: data.company,
+      typeBusiness: "1c",
+      tax: 0,
+      finance: {},
+    });
+
+     await clientDoc.save();
+  }
+
 }
