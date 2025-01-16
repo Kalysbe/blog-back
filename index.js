@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
-import { UserController, PostController, DeclarationController, ClientController, XmlController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController } from './controllers/index.js';
 
 mongoose.set('strictQuery', false);
 
@@ -74,6 +74,8 @@ app.put(`/api/clients/:id`, handleValidationErrors, ClientController.update);
 app.post('/api/xml', bodyParser.text({ type: 'application/xml' }), XmlController.create);
 app.get(`/api/xml`, XmlController.getAll);
 app.post(`/api/xml/convert`, bodyParser.text({ type: 'application/xml' }), XmlController.converter);
+
+app.get(`/api/email/users`,EmailController.getAll);
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
