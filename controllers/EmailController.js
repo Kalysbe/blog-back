@@ -16,7 +16,7 @@ const getMailAccountsFromServer = () => {
           .split('\n')
           .filter(line => line.includes('/var/mail/'))
           .map(line => line.split(':')[0]); // Берем только имя пользователя
-  
+        console.log(accounts,'accoutnts')
         resolve(accounts);
       });
     });
@@ -31,7 +31,7 @@ export const getAll = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: 'Не удалось получить статьи',
+      message: 'Не удалось получить пользователей',
     });
   }
 };
