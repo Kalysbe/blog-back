@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 
 const openai = new OpenAI({
-  apiKey: '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',
+  apiKey: '',
 });
 
 export const getLastTags = async (req, res) => {
