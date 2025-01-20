@@ -1,4 +1,10 @@
 import PostModel from '../models/Post.js';
+import OpenAI from 'openai';
+
+
+const openai = new OpenAI({
+  apiKey: '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',
+});
 
 export const getLastTags = async (req, res) => {
   try {
@@ -104,7 +110,6 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-  console.log(req)
   try {
     const doc = new PostModel({
       title: req.body.title,
@@ -119,6 +124,38 @@ export const create = async (req, res) => {
     res.json(post);
   } catch (err) {
     console.log(err);
+    res.status(500).json({
+      message: 'Не удалось создать статью',
+    });
+  }
+};
+
+export const createChatGpt = async (req, res) => {
+  try {
+    const topic = req.body.topic || 'бухгалтерия';
+
+    // Генерация текста
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: `Напиши статью про ${topic}` }],
+    });
+
+    const generatedText = response.choices[0].message.content;
+
+    // Сохранение статьи в базе данных
+    const doc = new PostModel({
+      title: req.body.title || 'Автоматически созданная статья',
+      text: generatedText,
+      imageUrl: req.body.imageUrl || '',
+      tags: req.body.tags ? req.body.tags.split(',') : ['бухгалтерия'],
+      user: req.userId,
+    });
+
+    const post = await doc.save();
+
+    res.json(post);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: 'Не удалось создать статью',
     });
