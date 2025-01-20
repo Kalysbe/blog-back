@@ -56,6 +56,7 @@ app.get(`/api/posts`, PostController.getAll);
 app.get(`/api/posts/tags`, PostController.getLastTags);
 app.get(`/api/posts/:id`, PostController.getOne);
 app.post(`/api/posts`, checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
+app.post(`/api/postsGPT`, checkAuth, handleValidationErrors, PostController.createChatGpt);
 app.delete(`/api/posts/:id`, checkAuth, PostController.remove);
 app.patch(`/api/posts/:id`, checkAuth, postCreateValidation, handleValidationErrors, PostController.update);
 
