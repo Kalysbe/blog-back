@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 
 
 const openai = new OpenAI({
-
+  apiKey: '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'
 });
 
 export const getLastTags = async (req, res) => {
@@ -136,7 +136,7 @@ export const createChatGpt = async (req, res) => {
 
     // Генерация текста
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: `Напиши статью про ${topic}` }],
     });
 
