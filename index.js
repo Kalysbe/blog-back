@@ -1,14 +1,17 @@
 import express from 'express';
 import fs from 'fs';
+
+
 import multer from 'multer';
 import cors from 'cors';
 import xmlparser from 'express-xml-bodyparser';
 import bodyParser  from 'body-parser';
 import mongoose from 'mongoose';
 
+
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
-import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController, TelegramBotController } from './controllers/index.js';
 
 mongoose.set('strictQuery', false);
 
@@ -78,6 +81,8 @@ app.get(`/xml/:id`, XmlController.getOne);
 app.post(`/xml/convert`, bodyParser.text({ type: 'application/xml' }), XmlController.converter);
 
 app.get(`/email/users`,EmailController.getAll);
+
+app.post(`/telegram/message`, TelegramBotController.messageToChannel)
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
