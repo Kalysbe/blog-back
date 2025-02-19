@@ -5,6 +5,13 @@ import { XMLParser } from "fast-xml-parser";
 
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
+/**
+ * Отправляет сообщение в канал с заголовком, коротким текстом (snippet) и кнопкой.
+ * @param {Object} params
+ * @param {string} params.title    - Заголовок статьи
+ * @param {string} params.text     - Полный текст статьи
+ * @param {string} params.url      - Ссылка на статью
+ */
 
 dotenv.config();
 
@@ -33,17 +40,36 @@ function sendMessageToUser(chatId, message) {
     bot.sendMessage(chatId, message);
 }
 
-async function sendMessageToChannel(message) {
-    try {
-      // Отправляем сообщение в канал и ждем завершения операции
-      await bot.sendMessage(CHANNEL_ID, message);
-      return true;  // Сообщение отправлено успешно
-    } catch (error) {
-      console.error("Ошибка при отправке сообщения в канал:", error);
-      return false;  // Ошибка при отправке
-    }
+export async function sendMessageToChannel({ title, text, url }) {
+  try {
+    // Формируем сокращённый текст (snippet)
+    // Если текст длиннее 60 символов, обрезаем и ставим "..."
+    const snippet = text.length > 60 ? text.substring(0, 60) + '...' : text;
+
+    // Формируем само сообщение. Для жирного текста используем Markdown:
+    const message = `*${title}*\n\n${snippet}`;
+
+    // Отправляем сообщение с кнопкой и Markdown-разметкой
+    await bot.sendMessage(CHANNEL_ID, message, {
+      parse_mode: 'Markdown',   // или 'MarkdownV2', если хотите расширенную Markdown
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Подробнее', // Текст, который будет на кнопке
+              url: url          // Ссылка, куда перейдёт пользователь по нажатию
+            }
+          ]
+        ]
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Ошибка при отправке сообщения в канал:", error);
+    return false;
   }
-  
+}
 
 // app.post('/send-message', (req, res) => {
 //     const { message } = req.body;
