@@ -1,6 +1,6 @@
 import express from 'express';
 import fs from 'fs';
-
+import './cron.js';
 
 import multer from 'multer';
 import cors from 'cors';
