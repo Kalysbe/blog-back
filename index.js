@@ -11,7 +11,8 @@ import mongoose from 'mongoose';
 
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
-import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController, TelegramBotController } from './controllers/index.js';
+import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController, 
+  TelegramBotController,TrackerController } from './controllers/index.js';
 
 mongoose.set('strictQuery', false);
 
@@ -83,6 +84,8 @@ app.post(`/xml/convert`, bodyParser.text({ type: 'application/xml' }), XmlContro
 app.get(`/email/users`,EmailController.getAll);
 
 app.post(`/telegram/message`, TelegramBotController.messageToChannel)
+
+app.post('/tracker', TrackerController.create)
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
