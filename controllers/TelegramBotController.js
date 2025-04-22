@@ -33,7 +33,7 @@ function sendMessageToUser(chatId, message) {
     bot.sendMessage(chatId, message);
 }
 
-async function sendMessageToChannel(message) {
+export async function sendMessageToChannel(message) {
     try {
       // Отправляем сообщение в канал и ждем завершения операции
       await bot.sendMessage(CHANNEL_ID, message);

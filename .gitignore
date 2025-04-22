@@ -1,7 +1,3 @@
 node_modules
-<<<<<<< HEAD
-uploads/*
-=======
 uploads/*
 .env
->>>>>>> 6541ffa6c93d7e9be546d3349a0dedbbc5a95a5f
