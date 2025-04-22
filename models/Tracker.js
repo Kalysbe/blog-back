@@ -8,19 +8,19 @@ const TrackerSchema = new mongoose.Schema(
         },
         userAgent: {
             type: String,
-            required: true,
+            required: false,
         },
         deviceType: {
             type: String,
-            required: true,
+            required: false,
         },
         url: {
             type: String,
-            required: true,
+            required: false,
         },
         referer: {
             type: String,
-            required: true,
+            required: false,
         }
     },
     {
