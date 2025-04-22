@@ -1,5 +1,17 @@
 import TrackerModel from '../models/Tracker.js';
 
+export const getAll = async (req, res) => {
+  try {
+    const posts = await TrackerModel.find().populate('ip').sort({ createdAt: -1 }).exec();
+    res.json(posts);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Не удалось получить трекеры',
+    });
+  }
+};
+
 export const create = async (req, res) => {
   try {
     // Получаем IP-адрес из заголовков запроса

@@ -33,16 +33,19 @@ function sendMessageToUser(chatId, message) {
     bot.sendMessage(chatId, message);
 }
 
-export async function sendMessageToChannel(message) {
-    try {
-      // Отправляем сообщение в канал и ждем завершения операции
-      await bot.sendMessage(CHANNEL_ID, message);
-      return true;  // Сообщение отправлено успешно
-    } catch (error) {
-      console.error("Ошибка при отправке сообщения в канал:", error);
-      return false;  // Ошибка при отправке
-    }
+export async function sendMessageToChannel({ title, text, url }) {
+  const shortText = text?.slice(0, 500)?.trim();
+  const message = `📰 *${title}*\n\n${shortText || '_Нет текста_'}\n\n[Читать далее](${url})`;
+
+  try {
+    await bot.sendMessage(CHANNEL_ID, message, { parse_mode: 'Markdown' });
+    return true;
+  } catch (err) {
+    console.error('Ошибка при отправке сообщения в канал:', err);
+    return false;
   }
+}
+
   
 
 // app.post('/send-message', (req, res) => {

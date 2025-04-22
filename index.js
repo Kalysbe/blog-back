@@ -86,6 +86,7 @@ app.get(`/email/users`,EmailController.getAll);
 
 app.post(`/telegram/message`, TelegramBotController.messageToChannel)
 
+app.get('/trackers', TrackerController.getAll)
 app.post('/tracker', TrackerController.create)
 
 app.listen(process.env.PORT || 4444, (err) => {
