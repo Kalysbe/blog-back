@@ -15,10 +15,10 @@ export const getAll = async (req, res) => {
 export const create = async (req, res) => {
   try {
     // Получаем IP-адрес из заголовков запроса
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  
 
     // Извлекаем остальные данные из тела запроса
-    const { userAgent, deviceType, url, referer, timeSpent } = req.body;
+    const {ip, userAgent, deviceType, url, referer, timeSpent } = req.body;
 
     // Создаем новый документ с полученными данными
     const doc = new TrackerModel({
