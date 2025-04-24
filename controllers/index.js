@@ -6,3 +6,4 @@ export * as XmlController from './XmlController.js';
 export * as EmailController from './EmailController.js';
 export * as TelegramBotController from './TelegramBotController.js';
 export * as TrackerController from './TrackerController.js';
+export * as AIController from './AI.js'
