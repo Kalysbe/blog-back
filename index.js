@@ -12,8 +12,18 @@ import mongoose from 'mongoose';
 
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
-import { UserController, PostController, DeclarationController, ClientController, XmlController, EmailController, 
-  TelegramBotController,TrackerController ,AIController} from './controllers/index.js';
+import { 
+  UserController, 
+  PostController, 
+  DeclarationController, 
+  ClientController, 
+  XmlController, 
+  EmailController, 
+  TelegramBotController,
+  TrackerController ,
+  AIController, 
+  ContactController
+} from './controllers/index.js';
 
 mongoose.set('strictQuery', false);
 
@@ -91,6 +101,14 @@ app.post('/tracker', TrackerController.create)
 
 app.get('/post-contents', AIController.getAll)
 app.post('/post-contents', AIController.create)
+
+
+app.get(`/contacts`, ContactController.getAll);
+app.get(`/contact/:id`, ContactController.getOne);
+app.post(`/contact`, ContactController.create);
+app.delete(`/contact/:id`, ContactController.remove);
+app.put(`/contact/:id`, ContactController.update);
+
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
