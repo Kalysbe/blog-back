@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 
-import './cron.js'
+// import './cron.js'
 
 import multer from 'multer';
 import cors from 'cors';
@@ -99,9 +99,10 @@ app.post(`/telegram/message`, TelegramBotController.messageToChannel)
 app.get('/trackers', TrackerController.getAll)
 app.post('/tracker', TrackerController.create)
 
-app.get('/post-contents', AIController.getAll)
-app.post('/post-contents', AIController.create)
-
+app.get('/ai-settings', AIController.getAll)
+app.post('/ai-settings', AIController.create)
+app.put('/ai-settings/:id', AIController.update)
+app.get('/ai-info', AIController.getOpenAiInfo)
 
 app.get(`/contacts`, ContactController.getAll);
 app.get(`/contact/:id`, ContactController.getOne);

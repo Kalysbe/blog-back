@@ -1,15 +1,12 @@
 import mongoose from 'mongoose';
 
-const TrackerSchema = new mongoose.Schema(
-    {
-        name: {
-            type: String,
-            required: true,
-        },
-    },
-    {
-        timestamps: true,
-    },
-);
+const GenerationSettingsSchema = new mongoose.Schema({
+  active: Boolean,
+  systemPromptIdea: String,
+  userPromptIdea: Object,
+  systemPromptArticle: String,
+  userPromptArticle: String,
+  userId: String,
+});
 
-export default mongoose.model('Contents', TrackerSchema);
+export default mongoose.model('GenerationSettings', GenerationSettingsSchema);
